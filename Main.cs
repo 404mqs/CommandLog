@@ -25,7 +25,7 @@ namespace CommandLog
 
         }
 
-        public static void SendToDiscord(string caller, string displayname, string command, string reason)
+        public static void SendToDiscord(string caller, string displayname, string command, string text)
         {
             var discordWebHookLink = MQSPlugin.Instance.Configuration.Instance.DiscordWebHookLink;
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(discordWebHookLink);
@@ -43,20 +43,21 @@ namespace CommandLog
 
         private void onChat(SteamPlayer player, EChatMode mode, ref Color chatted, ref bool isRich, string text, ref bool isVisible)
         {
-            var command = Configuration.Instance.LogCommands.FirstOrDefault(w => text.ToLower().Contains(w.name.ToLower()));
-
             var converted = UnturnedPlayer.FromSteamPlayer(player);
 
             var webhook = Configuration.Instance.DiscordWebHookLink;
 
-            if (Configuration.Instance.LogCommands.Any(w => text.ToLower().Contains(w.name.ToLower())))
-            {
-                if (webhook == "Discord Webhook Here")
-                {
-                    return;
-                }
+            var lower = text.ToLower();
 
-                SendToDiscord(Convert.ToString(converted.CSteamID), converted.DisplayName, text, webhook);
+            if (Configuration.Instance.LogCommands.Any(w => lower.StartsWith($"/{w.name} ")))
+            { 
+              if (webhook == "Discord Webhook Here")
+              {
+                return;
+              }            
+             
+              SendToDiscord(Convert.ToString(converted.CSteamID), converted.DisplayName, text, webhook);
+
             }
         }
 
